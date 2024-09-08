@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8" />
+    <title>Compress Your PDFs 📄✨</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333333;
+            font-size: 2.0rem;
+            margin-bottom: 20px;
+        }
+        .info {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555555;
+            line-height: 1.6;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .info span {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .info span::before {
+            content: attr(data-icon);
+            margin-right: 8px;
+        }
+        .dark-mode .info {
+            color: #dddddd;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+            transform: scale(1.02);
+        }
+        .quality-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .quality-select {
+            width: 100%;
+            max-width: 220px;
+            padding: 10px;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+        .quality-select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 12px;
+            border-bottom: 1px solid #eeeeee;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .file-list li:hover {
+            background-color: #f1f1f1;
+        }
+        .progress {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .done {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .dark-mode {
+            background: rgba(34, 34, 34, 0.9);
+            color: #ffffff;
+        }
+        .dark-mode h1 {
+            color: #ffffff;
+        }
+        .dark-mode .container {
+            background: rgba(34, 34, 34, 0.9);
+            color: #ffffff;
+        }
+        .dark-mode .custom-file-upload {
+            background-color: #444444;
+            color: #ffffff;
+        }
+        .dark-mode .custom-file-upload:hover {
+            background-color: #222222;
+        }
+        .dark-mode .quality-select {
+            background-color: #444444;
+            color: #ffffff;
+            border: 1px solid #555555;
+        }
+        .dark-mode .file-list li {
+            background-color: #444444;
+            border-bottom: 1px solid #555555;
+        }
+        .dark-mode .file-list li:hover {
+            background-color: #333333;
+        }
+        .dark-mode .progress {
+            color: #ffc107;
+        }
+        .dark-mode .done {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+<div class="container dark-mode">
+    <h1>📄 Compress Your PDFs ✨</h1>
+    <div class="info">
+        <span>🚀 Welcome to the fastest and most reliable PDF compression tool!</span>
+        <span>🔒 Your files are processed securely on your device. No uploads, no data leaks—just fast, local compression!</span>
+    </div>
+    <div class="quality-container">
+        <label for="qualitySelect">Choose Output Quality:</label>
+        <select id="qualitySelect" class="quality-select">
+            <option value="1080">1080p (High Quality)</option>
+            <option value="720" selected>720p (Medium Quality)</option>
+            <option value="480">480p (Standard Quality)</option>
+            <option value="360">360p (Low Quality)</option>
+        </select>
+    </div>
+    <label for="pdfFileInput" class="custom-file-upload">
+        📁 Choose PDF Files
+    </label>
+    <input type="file" id="pdfFileInput" accept=".pdf" multiple />
+    <ul class="file-list" id="fileList"></ul>
+    <div class="dark-mode-toggle">
+        <label for="darkModeSwitch">🌙 Dark Mode</label>
+        <input type="checkbox" id="darkModeSwitch" checked />
+    </div>
+</div>
+
+<script type="module">
+    import init, { compress_pdf } from "./pkg/compress.js";
+    await init();
+
+    document.getElementById('pdfFileInput').addEventListener('change', async function(event) {
+        const files = event.target.files;
+        const quality = document.getElementById('qualitySelect').value;
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+
+        for (const file of files) {
+            const listItem = document.createElement('li');
+            listItem.textContent = file.name;
+            const progressSpan = document.createElement('span');
+            progressSpan.className = 'progress';
+            progressSpan.textContent = 'Processing... ⏳';
+            listItem.appendChild(progressSpan);
+            fileList.appendChild(listItem);
+
+
+            const arrayBuffer = await file.arrayBuffer();
+            const compressedPdf = compress_pdf(new Uint8Array(arrayBuffer), parseInt(quality));
+            const outputFilename = file.name.replace('.pdf', `_compressed_${quality}.pdf`);
+            saveBufferAsFile(compressedPdf, outputFilename, 'application/pdf');
+
+            progressSpan.className = 'done';
+            progressSpan.textContent = 'Done! ✅';
+        }
+    });
+
+    function saveBufferAsFile(buffer, filename, mimeType) {
+        const blob = new Blob([buffer], { type: mimeType });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+    }
+
+    document.getElementById('darkModeSwitch').addEventListener('change', function(event) {
+        document.body.classList.toggle('dark-mode', event.target.checked);
+        document.querySelector('.container').classList.toggle('dark-mode', event.target.checked);
+    });
+</script>
+</body>
+</html>

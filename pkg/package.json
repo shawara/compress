@@ -1,0 +1,15 @@
+{
+  "name": "compress",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "compress_bg.wasm",
+    "compress.js",
+    "compress.d.ts"
+  ],
+  "main": "compress.js",
+  "types": "compress.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
